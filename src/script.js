@@ -76,7 +76,7 @@ displacement.canvas = document.createElement('canvas');
 displacement.canvas.width = 80;
 displacement.canvas.height = 80;
 displacement.canvas.style.position = 'fixed';
-displacement.canvas.style.width = '256';
+displacement.canvas.style.width = '256px';
 displacement.canvas.style.height = '256px';
 displacement.canvas.style.top = 0;
 displacement.canvas.style.left = 0;
@@ -87,6 +87,27 @@ document.body.appendChild(displacement.canvas);
 // Context
 displacement.context = displacement.canvas.getContext('2d');
 displacement.context.fillRect(0, 0, displacement.canvas.width, displacement.canvas.height);
+
+// Glow image
+displacement.glowImage = new Image();
+displacement.glowImage.src = './glow.png';
+
+// Interactive plane
+displacement.interactivePlane = new THREE.Mesh(
+  new THREE.PlaneGeometry(10, 10),
+  new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+);
+scene.add(displacement.interactivePlane);
+
+// Raycaster
+displacement.raycaster = new THREE.Raycaster();
+
+// Coordinates
+displacement.screenCursor = new THREE.Vector2(9999, 9999);
+window.addEventListener('pointermove', event => {
+  displacement.screenCursor.x = (event.clientX / sizes.width) * 2 - 1;
+  displacement.screenCursor.y = -(event.clientY / sizes.height) * 2 + 1;
+});
 
 /**
  * Particles
@@ -110,6 +131,9 @@ scene.add(particles);
 const tick = () => {
   // Update controls
   controls.update();
+
+  // Raycaster
+  displacement.raycaster.setFromCamera(displacement.screenCursor, camera);
 
   // Render
   renderer.render(scene, camera);
